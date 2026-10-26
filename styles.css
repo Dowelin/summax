@@ -17,6 +17,19 @@
   color-scheme: light;
 }
 
+:root[data-theme='dark'] {
+  --paper: #1a1c1f;
+  --ink: #e7e4dc;
+  --pencil: #9a9ea5;
+  --rule: #3a3d42;
+  --accent: #9fb8dc;
+  --accent-ink: #14161a;
+  --right: #8dbf98;
+  --wrong: #e3a08f;
+  --note: #23262a;
+  color-scheme: dark;
+}
+
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     --paper: #1a1c1f;
@@ -63,7 +76,9 @@ input {
 .page {
   max-width: var(--measure);
   margin: 0 auto;
-  padding: 40px 16px 64px;
+  padding-block: 40px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
 
 /* ---------------------------------------------------------- Startsidan */
@@ -395,7 +410,7 @@ input {
 
 @media (max-width: 520px) {
   .page {
-    padding-top: 20px;
+    padding-block-start: 20px;
   }
   .masthead h1,
   .summary h1 {
