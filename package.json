@@ -1,0 +1,19 @@
+{
+  "name": "summax",
+  "private": true,
+  "version": "0.1.0",
+  "description": "SummaX – adaptiv matematikträning för åk 6 och uppåt",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --test \"tests/**/*.test.ts\"",
+    "build": "tsc --noEmit && node scripts/build.mjs",
+    "serve": "node scripts/serve.mjs"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3"
+  }
+}
