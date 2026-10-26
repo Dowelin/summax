@@ -70,6 +70,7 @@ const sameDenominator = defineTemplate<{ n: number; a: number; b: number; op: '+
     const what = op === '+' ? 'lägger ihop' : 'tar bort';
     return {
       prompt: `Beräkna $${rawFrac(a, n)} ${sign(op)} ${rawFrac(b, n)}$`,
+      work: { terms: [{ n: a, d: n }, { n: b, d: n }], ops: [op] },
       answer: { type: 'number', value: facit, accept: ['fraction', 'mixed', 'integer', 'decimal'] },
       hints: [
         `Båda bråken har nämnaren ${n}. Vad händer med nämnaren när man ${what} ${PART_NAMES[n]?.[1] ?? `${n}-delar`}?`,
@@ -132,6 +133,7 @@ const differentDenominators = defineTemplate<TwoFractions>({
       dd === L ? `$${rawFrac(n, dd)}$ har redan nämnaren ${L}` : `$${rawFrac(n, dd)} = ${rawFrac(n2, L)}$`;
     return {
       prompt: `Beräkna $${rawFrac(a, b)} ${sign(op)} ${rawFrac(c, d)}$`,
+      work: { terms: [{ n: a, d: b }, { n: c, d: d }], ops: [op] },
       instruction: 'Svara i enklaste form.',
       answer: { type: 'number', value: facit, accept: ['fraction', 'mixed', 'integer'], requireReduced: true },
       hints: [

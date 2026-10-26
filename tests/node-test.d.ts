@@ -16,6 +16,7 @@ declare module 'node:assert/strict' {
     deepEqual(actual: unknown, expected: unknown, message?: string): void;
     throws(fn: () => unknown, message?: string): void;
     fail(message?: string): never;
+    match(value: string, re: RegExp, message?: string): void;
   }
   const assert: Assert;
   export default assert;

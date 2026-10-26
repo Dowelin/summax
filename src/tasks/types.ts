@@ -36,6 +36,8 @@ export interface TaskBody {
   misconceptions: readonly Misconception[];
   /** Facit som text, för ledtråd 4 och föräldravyn. */
   facitText: string;
+  /** Bråken i uppgiften, för bråkverkstaden. Finns bara när uppgiften är ett rent bråkuttryck. */
+  work?: { terms: Array<{ n: number; d: number }>; ops: Array<'+' | '-'> };
 }
 
 export interface TemplateDef<P> {

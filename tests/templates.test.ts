@@ -7,6 +7,7 @@ import { UNITS } from '../src/core/units.ts';
 import { classify } from '../src/tasks/classify.ts';
 import { TEMPLATES } from '../src/tasks/registry.ts';
 import type { Task } from '../src/tasks/types.ts';
+import { start, valueOf } from '../src/tasks/fractionWork.ts';
 
 /**
  * Testerna från Fas 3, "Tester som måste gå igenom innan en mall släpps".
@@ -124,6 +125,12 @@ describe(`uppgiftsmallar (${VARIANTS} varianter per mall)`, () => {
           }
           const c = classify(task as Task, r);
           if (c.kind !== 'knowledge' || c.misconception.id !== m.id) note(`felmönstret ${m.id} klassas som ${c.kind}`, seed);
+        }
+
+        // Bråkverkstadens uttryck har samma värde som facit
+        if (task.work) {
+          const v = valueOf(start(task.work.terms, task.work.ops));
+          if (!v.eq(facit)) note(`bråkverkstaden ger ${v}, facit ${facit}`, seed);
         }
 
         // 7. Ledtråd 4 slutar med facit

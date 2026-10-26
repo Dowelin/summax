@@ -4,6 +4,7 @@ import { AREAS, type AreaId, type Level } from '../tasks/types.ts';
 import { checkCalcLine, checkLine, markupToPlain } from '../tasks/workpad.ts';
 import { createMathInput, mathLiveReady, setUseMathLive, usingMathLive, type MathInput } from './input.ts';
 import { esc, math, rich } from './math.ts';
+import { mountWorkshop } from './workshop.ts';
 
 /**
  * Gränssnittet: en lärobok med kapitel i egna färger och ett tumregister i
@@ -132,7 +133,10 @@ function renderTask(): void {
   const givenCalc = /^Beräkna \$(.+)\$$/.exec(t.prompt)?.[1];
   const given = givenEq ?? givenCalc;
 
-  const howto = equations
+  const workshop = t.work !== undefined;
+  const howto = workshop
+    ? 'Arbeta direkt i bråken här ovanför, eller skriv egna rader. Svaret skrivs på svarsraden.'
+    : equations
     ? `Skriv ett steg per rad och tryck Enter. Varje rad kontrolleras. Skriv <span class="math">${math('x =')}</span> … när du är klar.`
     : `Räkna på raderna och tryck Enter för en ny rad. Varje likhetstecken kontrolleras. Skriv svaret på svarsraden.`;
 
@@ -156,10 +160,11 @@ function renderTask(): void {
         </article>
 
         <section class="notebook" aria-label="Räknehäfte">
-          <p class="howto">${howto}</p>
+          ${workshop ? '<div data-workshop></div>' : `<p class="howto">${howto}</p>`}
           <ol class="lines" data-lines>
             ${given ? `<li class="line given"><span class="mark"></span><span class="given-eq math">${math(given)}</span></li>` : ''}
           </ol>
+          ${workshop ? '<button class="link add-line" data-add-line>Skriv en egen rad</button>' : ''}
           ${equations ? '' : '<div class="answer-row" data-answer></div>'}
           <p class="feedback" role="status" data-feedback></p>
         </section>
@@ -193,6 +198,8 @@ function renderTask(): void {
   };
 
   const finish = (): void => {
+    ws?.disable();
+    root.querySelector<HTMLButtonElement>('[data-add-line]')?.setAttribute('hidden', '');
     inputs.forEach((i) => i.setReadOnly(true));
     root.querySelectorAll<HTMLButtonElement>('.line-btn').forEach((b) => (b.hidden = true));
     hintBtn.hidden = true;
@@ -351,6 +358,32 @@ function renderTask(): void {
     });
   }
 
+  const workshopHost = root.querySelector<HTMLElement>('[data-workshop]');
+  const stepLines: HTMLLIElement[] = [];
+  const ws = workshopHost
+    ? mountWorkshop(workshopHost, t, {
+        onStep: (markup) => {
+          const li = document.createElement('li');
+          li.className = 'line given';
+          li.dataset.mark = 'ok';
+          li.innerHTML = `<span class="mark" aria-hidden="true">✓</span><span class="given-eq math">${math(`= ${markup}`)}</span>`;
+          linesEl.append(li);
+          stepLines.push(li);
+        },
+        onUndoStep: () => stepLines.pop()?.remove(),
+        onMistake: () => s.noteWrongStep(),
+        onAnswer: (text) => {
+          const row = root.querySelector<HTMLElement>('.answer-line')!;
+          const shown = row.querySelector<HTMLElement>('.answer-from-workshop') ?? document.createElement('span');
+          shown.className = 'answer-from-workshop math';
+          shown.innerHTML = math(text.includes('/') ? `{${text}}` : text);
+          row.querySelector('.line-input')!.prepend(shown);
+          answer?.el.setAttribute('hidden', '');
+          submitAnswer(text, row);
+        },
+      })
+    : null;
+
   hintBtn.addEventListener('click', () => {
     const i = rec.hintsShown;
     const h = s.showHint();
@@ -374,7 +407,11 @@ function renderTask(): void {
     b.addEventListener('click', () => void startSession(b.dataset.mode as Mode)),
   );
   updateHintButton();
-  addScratchLine().focus();
+  if (workshop) {
+    root.querySelector('[data-add-line]')!.addEventListener('click', () => addScratchLine().focus());
+  } else {
+    addScratchLine().focus();
+  }
 }
 
 // ------------------------------------------------------------ Sammanfattning
