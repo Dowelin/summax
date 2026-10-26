@@ -7,11 +7,12 @@ export type Level = 1 | 2 | 3 | 4 | 5;
 /** Prototypens fyra områden (Fas 1, punkt 5 i "Där jag ifrågasätter upplägget"). */
 export type AreaId = 'brak' | 'procent' | 'ekvationer' | 'geometri';
 
-export const AREAS: Record<AreaId, { title: string; skills: string }> = {
-  brak: { title: 'Bråk', skills: 'T3.5 Addera och subtrahera bråk' },
-  procent: { title: 'Procent', skills: 'F2.1 Rabatt och påslag' },
-  ekvationer: { title: 'Ekvationer', skills: 'A2.1–A2.3 Ekvationer' },
-  geometri: { title: 'Omkrets och area', skills: 'G2.1–G2.4 Omkrets och area' },
+/** Kapitlen i boken, i ordning. Färgen sätts i CSS som --ch-<id>. */
+export const AREAS: Record<AreaId, { chapter: number; title: string; tab: string; about: string; skills: string }> = {
+  brak: { chapter: 1, title: 'Bråk', tab: 'Bråk', about: 'Addera och subtrahera bråk', skills: 'T3.5' },
+  procent: { chapter: 2, title: 'Procent', tab: 'Procent', about: 'Rabatt, påslag och pris före rean', skills: 'F2.1' },
+  ekvationer: { chapter: 3, title: 'Ekvationer', tab: 'Ekvationer', about: 'Lös ekvationer steg för steg', skills: 'A2.1–A2.3' },
+  geometri: { chapter: 4, title: 'Omkrets och area', tab: 'Geometri', about: 'Rektanglar, trianglar och sammansatta figurer', skills: 'G2.1–G2.4' },
 };
 
 export interface Misconception {

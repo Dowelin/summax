@@ -11,6 +11,7 @@ Bakgrund och beslut finns i [docs/BESLUT.md](docs/BESLUT.md).
 - Fyra områden: bråk (T3.5), procent (F2.1), ekvationer (A2.1–A2.3) och omkrets och area (G2.1–G2.4).
 - 18 uppgiftsmallar på nivå 1–4, var och en med fyra ledtrådar och kända felmönster.
 - Exakt rättning med bråktal (`bigint`), aldrig flyttal. Rätt värde i fel form räknas inte som fel.
+- Räknehäfte med räknerader som kontrolleras exakt, och matematikfältet MathLive.
 - Ingen inloggning och ingen databas ännu. Nivåerna sparas bara i webbläsaren.
 
 ## Kom igång
@@ -27,7 +28,7 @@ npm run serve      # http://localhost:5173
 Färre varianter vid snabb testning: `SUMMAX_VARIANTS=500 npm test`.
 
 En bestämd uppgift kan öppnas för felsökning med `#uppgift=<mall-id>:<frö>`,
-t.ex. `http://localhost:5173/#uppgift=T3.5-2-olika-namnare:7`.
+t.ex. `http://localhost:5173/#uppgift=T3.5-2-olika-namnare:7`. Lägg till `?textfalt` för att prova utan MathLive.
 
 ## Struktur
 

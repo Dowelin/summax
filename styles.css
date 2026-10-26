@@ -1,46 +1,81 @@
-/* SummaX – en mattebok, inte en spelapp. Se Fas 3, "Design: som en bra mattebok". */
+/*
+ * SummaX – en lärobok och ett räknehäfte.
+ * Boksidan ligger på ett skrivbord. Varje kapitel har en egen färg som syns i
+ * tumregistret i sidans kant, i uppgiftsnumret och i markören. Där Samuel
+ * skriver är papperet rutat, och rätt rader får en bock i marginalen.
+ */
 
 :root {
-  --paper: #faf8f3;
-  --ink: #1c1e21;
-  --pencil: #6b6f76;
-  --rule: #d9d5cb;
-  --accent: #1f3a5f;
-  --accent-ink: #faf8f3;
-  --right: #3c6b47;
-  --wrong: #8a3f2e;
-  --note: #f1eee6;
+  /* skrivbord, boksida och bläck */
+  --desk: #e3e8ee;
+  --sheet: #fdfdfc;
+  --ink: #1d2430;
+  --pencil: #5c6673;
+  --rule: #d5dce4;
+  /* rutat papper */
+  --grid: #dbe6f0;
+  --grid-paper: #f8fbfd;
+  /* rätt, fel, information */
+  --right: #2e7d4c;
+  --wrong: #a63c2a;
+  --info: #5c6673;
+  --note: #f1f4f7;
+  /* kapitelfärger */
+  --ch-brak: #2166a8;
+  --ch-procent: #b5780f;
+  --ch-ekvationer: #7b3f90;
+  --ch-geometri: #1a8486;
+  --ch-blandat: #1d2430;
+  --on-ch: #ffffff;
 
   --serif: 'Source Serif 4', 'Source Serif Pro', Georgia, serif;
   --sans: 'Source Sans 3', 'Source Sans Pro', system-ui, sans-serif;
-  --measure: 680px;
+  --hand: 'Kalam', 'Comic Neue', 'Segoe Print', cursive;
+  --sq: 24px; /* en ruta i räknehäftet */
+  --sheet-w: 720px;
   color-scheme: light;
 }
 
 :root[data-theme='dark'] {
-  --paper: #1a1c1f;
-  --ink: #e7e4dc;
-  --pencil: #9a9ea5;
-  --rule: #3a3d42;
-  --accent: #9fb8dc;
-  --accent-ink: #14161a;
-  --right: #8dbf98;
-  --wrong: #e3a08f;
-  --note: #23262a;
+  --desk: #11151a;
+  --sheet: #1a1f26;
+  --ink: #e5e8ec;
+  --pencil: #9aa4af;
+  --rule: #2f3843;
+  --grid: #26313c;
+  --grid-paper: #1d232b;
+  --right: #7cc394;
+  --wrong: #ef9d8a;
+  --info: #9aa4af;
+  --note: #222932;
+  --ch-brak: #74aee6;
+  --ch-procent: #e3ad4f;
+  --ch-ekvationer: #c592d8;
+  --ch-geometri: #5cc6c6;
+  --ch-blandat: #e5e8ec;
+  --on-ch: #11151a;
   color-scheme: dark;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --paper: #1a1c1f;
-    --ink: #e7e4dc;
-    --pencil: #9a9ea5;
-    --rule: #3a3d42;
-    --accent: #9fb8dc;
-    --accent-ink: #14161a;
-    --right: #8dbf98;
-    --wrong: #e3a08f;
-    --note: #23262a;
+    --desk: #11151a;
+    --sheet: #1a1f26;
+    --ink: #e5e8ec;
+    --pencil: #9aa4af;
+    --rule: #2f3843;
+    --grid: #26313c;
+    --grid-paper: #1d232b;
+    --right: #7cc394;
+    --wrong: #ef9d8a;
+    --info: #9aa4af;
+    --note: #222932;
+    --ch-brak: #74aee6;
+    --ch-procent: #e3ad4f;
+    --ch-ekvationer: #c592d8;
+    --ch-geometri: #5cc6c6;
+    --ch-blandat: #e5e8ec;
+    --on-ch: #11151a;
     color-scheme: dark;
   }
 }
@@ -55,7 +90,7 @@ html {
 
 body {
   margin: 0;
-  background: var(--paper);
+  background: var(--desk);
   color: var(--ink);
   font-family: var(--sans);
   font-size: 17px;
@@ -69,50 +104,167 @@ input {
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--ch, var(--ink));
   outline-offset: 3px;
 }
 
-.page {
-  max-width: var(--measure);
-  margin: 0 auto;
-  padding-block: 40px 64px;
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
+[hidden] {
+  display: none !important;
 }
 
-/* ---------------------------------------------------------- Startsidan */
+/* ---------------------------------------------------------- Skrivbord och sida */
 
-.masthead h1,
-.summary h1 {
+.desk {
+  min-height: 100vh;
+  padding-block: 32px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(52px, env(safe-area-inset-right, 0px));
+}
+
+.sheet {
+  position: relative;
+  max-width: var(--sheet-w);
+  margin: 0 auto;
+  padding: 36px 48px 48px;
+  background: var(--sheet);
+  border-radius: 2px;
+  box-shadow:
+    0 1px 2px rgb(20 30 45 / 0.08),
+    0 8px 28px rgb(20 30 45 / 0.07);
+}
+
+/* Tumregistret: flikar i sidans högra kant, en per kapitel. */
+.thumbs {
+  position: absolute;
+  top: 56px;
+  right: -36px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.thumb {
+  width: 36px;
+  height: 92px;
+  padding: 0;
+  border: 0;
+  border-radius: 0 6px 6px 0;
+  background: var(--ch);
+  color: var(--on-ch);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.thumb span {
+  writing-mode: vertical-rl;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  max-height: 84px;
+}
+
+.thumb.dim {
+  background: var(--rule);
+  color: var(--pencil);
+}
+
+.thumb.dim span {
+  opacity: 0;
+}
+
+.thumb:hover span,
+.thumb:focus-visible span {
+  opacity: 1;
+}
+
+/* ---------------------------------------------------------- Innehåll */
+
+.cover {
+  margin-bottom: 28px;
+}
+
+.wordmark {
+  margin: 0;
   font-family: var(--serif);
   font-weight: 700;
-  font-size: 44px;
+  font-size: 20px;
+  letter-spacing: 0.01em;
+}
+
+.wordmark span {
+  display: inline-block;
+  margin-left: 1px;
+  padding: 0 4px;
+  background: var(--ink);
+  color: var(--sheet);
+  border-radius: 2px;
+  transform: rotate(-4deg);
+}
+
+.cover h1 {
+  margin: 20px 0 0;
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 42px;
   line-height: 1.1;
-  letter-spacing: -0.01em;
-  margin: 24px 0 8px;
+  text-wrap: balance;
 }
 
 .lede {
+  margin: 8px 0 0;
   font-family: var(--serif);
   font-size: 19px;
   color: var(--pencil);
-  margin: 0 0 40px;
 }
 
-.toc {
+.mixed {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  margin-bottom: 28px;
+  padding: 16px 20px;
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  background: var(--sheet);
+  text-align: left;
+  cursor: pointer;
+}
+
+.mixed:hover {
+  background: var(--note);
+}
+
+.mixed-title {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 22px;
+}
+
+.mixed-sub {
+  color: var(--pencil);
+  font-size: 15px;
+}
+
+.chapters {
   list-style: none;
   margin: 0;
   padding: 0;
-  border-top: 1px solid var(--ink);
+  display: grid;
+  gap: 4px;
 }
 
-.toc-row {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
+.chapter {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  align-items: center;
+  gap: 16px;
   width: 100%;
-  padding: 16px 2px;
+  padding: 12px 8px 12px 0;
   border: 0;
   border-bottom: 1px solid var(--rule);
   background: none;
@@ -120,95 +272,158 @@ input {
   cursor: pointer;
 }
 
-.toc-title {
+.ch-no {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 56px;
+  background: var(--ch);
+  color: var(--on-ch);
   font-family: var(--serif);
-  font-size: 22px;
+  font-weight: 700;
+  font-size: 30px;
+  border-radius: 3px;
 }
 
-.toc-main .toc-title {
+.ch-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ch-title {
+  font-family: var(--serif);
   font-weight: 600;
+  font-size: 22px;
+  line-height: 1.25;
 }
 
-.leader {
-  flex: 1;
-  border-bottom: 1.5px dotted var(--pencil);
-  transform: translateY(-5px);
-  min-width: 24px;
+.chapter:hover .ch-title {
+  color: var(--ch);
 }
 
-.toc-meta {
+.ch-about {
   color: var(--pencil);
-  font-variant-numeric: tabular-nums;
+  font-size: 15px;
 }
 
-.toc-row:hover .toc-title {
-  color: var(--accent);
+.ch-level {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.boxes {
+  display: flex;
+  gap: 3px;
+}
+
+.boxes i {
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid var(--ch);
+  border-radius: 2px;
+}
+
+.boxes i.on {
+  background: var(--ch);
+}
+
+.ch-level-text {
+  font-size: 13px;
+  color: var(--pencil);
 }
 
 .colophon {
-  margin-top: 48px;
+  margin: 32px 0 0;
   font-size: 14px;
   color: var(--pencil);
 }
 
-/* ---------------------------------------------------------- Uppgiftsvyn */
+/* ---------------------------------------------------------- Uppgift */
 
 .runhead {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 16px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--rule);
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--ch);
   font-size: 15px;
-  color: var(--pencil);
 }
 
-.runhead .where {
+.chapter-name {
   flex: 1;
-  text-align: center;
+  color: var(--ch);
+  font-weight: 600;
 }
 
-.count {
+.progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--pencil);
   font-variant-numeric: tabular-nums;
 }
 
-.exercise {
-  position: relative;
-  margin-top: 40px;
-  padding-left: 52px;
+.cells {
+  display: flex;
+  gap: 3px;
 }
 
-/* Uppgiftsnumret hänger i marginalen, som i en lärobok. */
+.cells i {
+  width: 8px;
+  height: 8px;
+  border: 1px solid var(--rule);
+  border-radius: 1px;
+}
+
+.cells i.done {
+  background: var(--pencil);
+  border-color: var(--pencil);
+}
+
+.cells i.now {
+  border-color: var(--ch);
+  background: var(--ch);
+}
+
+.exercise {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 4px;
+  margin-top: 32px;
+}
+
 .exno {
-  position: absolute;
-  left: 0;
-  top: 2px;
-  width: 36px;
   font-family: var(--serif);
   font-weight: 700;
-  font-size: 26px;
-  line-height: 1.2;
-  color: var(--accent);
-  text-align: right;
-  font-variant-numeric: lining-nums;
+  font-size: 30px;
+  line-height: 1.1;
+  color: var(--ch);
+}
+
+.exbody {
+  min-width: 0;
 }
 
 .prompt {
+  margin: 0 0 16px;
   font-family: var(--serif);
   font-size: 21px;
   line-height: 1.6;
-  margin: 0 0 20px;
 }
 
 .instruction {
+  margin: 0;
   font-family: var(--serif);
   font-style: italic;
   color: var(--pencil);
-  margin: 0 0 20px;
 }
 
 .figure-wrap {
-  margin: 4px 0 20px;
+  margin: 0 0 16px;
+  overflow-x: auto;
 }
 
 .figure {
@@ -241,58 +456,172 @@ input {
   font-size: 14px;
 }
 
-/* Svarsraden: som att skriva på en linje i ett häfte. */
-.answer {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  margin-top: 28px;
+/* ---------------------------------------------------------- Räknehäftet */
+
+.notebook {
+  margin: 28px -48px 0;
+  padding: calc(var(--sq) * 0.5) 48px var(--sq);
+  background-color: var(--grid-paper);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: var(--sq) var(--sq);
+  background-position: -1px -1px;
+  border-block: 1px solid var(--grid);
 }
 
-.answer label {
+.howto {
+  margin: 0 0 8px 52px;
+  font-size: 14px;
+  line-height: var(--sq);
+  color: var(--pencil);
+}
+
+.lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.line {
+  display: grid;
+  grid-template-columns: 52px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  min-height: calc(var(--sq) * 2);
+}
+
+.line:has(.line-label) {
+  grid-template-columns: 52px auto 1fr auto;
+}
+
+.answer-row {
+  margin-top: var(--sq);
+}
+
+.answer-line .line-label {
+  font-weight: 600;
+  font-style: normal;
+}
+
+.answer-line .line-input {
+  border-bottom: 3px double var(--ink);
+}
+
+.answer-line math-field.mathinput,
+.answer-line .textinput input {
+  border-bottom: 0;
+  box-shadow: none;
+}
+
+.line .mark {
+  grid-column: 1;
+  font-family: var(--hand);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+}
+
+.line[data-mark='ok'] .mark,
+.line[data-mark='right'] .mark {
+  color: var(--right);
+}
+
+.line[data-mark='wrong'] .mark {
+  color: var(--wrong);
+}
+
+.line-label {
   font-family: var(--serif);
   font-style: italic;
   font-size: 19px;
 }
 
-.answer input {
-  flex: 1;
+.line-input {
   min-width: 0;
-  padding: 6px 2px;
+}
+
+.given-eq {
+  font-size: 22px;
+  color: var(--pencil);
+  padding-left: 4px;
+}
+
+
+/* MathLive-fältet */
+math-field.mathinput {
+  display: block;
+  width: 100%;
+  min-height: calc(var(--sq) * 1.6);
+  padding: 2px 4px;
+  border: 0;
+  border-bottom: 1.5px solid var(--ink);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 24px;
+  --caret-color: var(--ch);
+  --selection-background-color: color-mix(in srgb, var(--ch) 22%, transparent);
+  --primary-color: var(--ch);
+  --placeholder-color: var(--pencil);
+  --contains-highlight-background-color: transparent;
+}
+
+math-field.mathinput:focus-within {
+  outline: none;
+  border-bottom-color: var(--ch);
+  box-shadow: 0 1.5px 0 var(--ch);
+}
+
+math-field.mathinput[read-only] {
+  border-bottom-style: dotted;
+}
+
+math-field::part(virtual-keyboard-toggle),
+math-field::part(menu-toggle) {
+  display: none;
+}
+
+/* Reserv: vanligt textfält med förhandsvisning */
+.textinput input {
+  width: 100%;
+  padding: 4px 4px;
   border: 0;
   border-bottom: 1.5px solid var(--ink);
   background: transparent;
   font-family: var(--serif);
-  font-size: 21px;
+  font-size: 22px;
 }
 
-.answer input:focus-visible {
+.textinput input:focus-visible {
   outline: none;
-  border-bottom-color: var(--accent);
-  box-shadow: 0 1.5px 0 var(--accent);
+  border-bottom-color: var(--ch);
+  box-shadow: 0 1.5px 0 var(--ch);
 }
 
-.answer input[readonly] {
+.textinput input[readonly] {
   border-bottom-style: dotted;
 }
 
-.preview {
-  min-height: 2.6em;
-  margin: 8px 0 0 52px;
+.textinput-preview {
+  min-height: 1.4em;
+  padding: 4px 4px 0;
   font-family: var(--serif);
-  font-size: 19px;
+  font-size: 18px;
   color: var(--pencil);
 }
 
-.preview.unreadable {
+.textinput-preview.unreadable {
   font-family: var(--sans);
-  font-size: 15px;
+  font-size: 14px;
 }
 
 .feedback {
-  min-height: 1.5em;
-  margin: 4px 0 0;
-  font-size: 17px;
+  min-height: var(--sq);
+  margin: 8px 0 0 52px;
+  font-size: 16px;
+  line-height: var(--sq);
 }
 
 .feedback.correct {
@@ -304,16 +633,25 @@ input {
   color: var(--wrong);
 }
 
+.feedback.info {
+  color: var(--info);
+}
+
+/* ---------------------------------------------------------- Ledtrådar och knappar */
+
 .hints {
   list-style: none;
-  margin: 16px 0 0;
+  margin: 24px 0 0 52px;
   padding: 0;
+  display: grid;
+  gap: 10px;
 }
 
 .hint {
-  margin: 0 0 12px;
+  display: grid;
+  gap: 2px;
   padding: 10px 14px;
-  border-left: 2px solid var(--accent);
+  border-left: 3px solid var(--ch);
   background: var(--note);
   font-family: var(--serif);
   font-size: 18px;
@@ -321,9 +659,8 @@ input {
 }
 
 .hint-label {
-  display: block;
   font-family: var(--sans);
-  font-size: 14px;
+  font-size: 13px;
   color: var(--pencil);
 }
 
@@ -335,39 +672,88 @@ input {
   display: flex;
   align-items: center;
   gap: 20px;
-  margin-top: 24px;
+  margin: 24px 0 0 52px;
+}
+
+.summary .actions {
+  margin-left: 0;
 }
 
 .primary {
   padding: 9px 18px;
-  border: 1.5px solid var(--accent);
+  border: 0;
   border-radius: 3px;
-  background: var(--accent);
-  color: var(--accent-ink);
+  background: var(--ch, var(--ink));
+  color: var(--on-ch);
   font-weight: 600;
   cursor: pointer;
+  white-space: nowrap;
+}
+
+.summary .primary {
+  background: var(--ink);
+  color: var(--sheet);
 }
 
 .primary:hover {
-  filter: brightness(1.12);
+  filter: brightness(1.1);
 }
 
 .link {
   padding: 4px 0;
   border: 0;
   background: none;
-  color: var(--accent);
+  color: var(--ch, var(--ink));
   text-decoration: underline;
   text-underline-offset: 3px;
   text-decoration-thickness: 1px;
   cursor: pointer;
+  white-space: nowrap;
 }
 
-[hidden] {
-  display: none !important;
+.runhead .link {
+  color: var(--pencil);
 }
 
-/* ---------------------------------------------------------- Matematik */
+/* ---------------------------------------------------------- Sammanfattning */
+
+.sum-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.sum-list li {
+  display: grid;
+  grid-template-columns: 36px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.sum-no {
+  font-family: var(--serif);
+  font-weight: 700;
+  color: var(--ch);
+  font-variant-numeric: tabular-nums;
+}
+
+.sum-ch {
+  font-family: var(--serif);
+}
+
+.sum-how {
+  font-size: 15px;
+  color: var(--pencil);
+}
+
+.sum-how.strong {
+  color: var(--right);
+}
+
+/* ---------------------------------------------------------- Matematik i text */
 
 .math {
   font-family: var(--serif);
@@ -402,35 +788,92 @@ input {
   padding: 0.06em 0.2em 0;
 }
 
-.mn + .frac {
-  margin-left: 0.08em;
-}
-
 /* ---------------------------------------------------------- Mobil */
 
-@media (max-width: 520px) {
-  .page {
-    padding-block-start: 20px;
+@media (max-width: 640px) {
+  .desk {
+    padding-block: 0;
+    padding-left: 0;
+    padding-right: 0;
   }
-  .masthead h1,
-  .summary h1 {
-    font-size: 36px;
+  .sheet {
+    padding: 0 max(16px, env(safe-area-inset-right, 0px)) 40px max(16px, env(safe-area-inset-left, 0px));
+    border-radius: 0;
+    box-shadow: none;
+    min-height: 100vh;
+  }
+  /* Tumregistret blir en rad flikar överst. */
+  .thumbs {
+    position: static;
+    flex-direction: row;
+    margin: 0 calc(-1 * max(16px, env(safe-area-inset-left, 0px))) 20px;
+    gap: 3px;
+  }
+  .thumb {
+    flex: 1;
+    width: auto;
+    height: 30px;
+    border-radius: 0 0 5px 5px;
+  }
+  .thumb span {
+    writing-mode: horizontal-tb;
+    font-size: 12px;
+    max-height: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 4px;
+  }
+  .thumb.dim span {
+    opacity: 1;
+  }
+  .cover h1 {
+    font-size: 34px;
+  }
+  .chapter {
+    grid-template-columns: 44px 1fr;
+  }
+  .ch-no {
+    height: 44px;
+    font-size: 24px;
+  }
+  .ch-level {
+    grid-column: 2;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+  .progress .cells {
+    display: none;
   }
   .exercise {
-    padding-left: 0;
+    grid-template-columns: 36px 1fr;
+    margin-top: 20px;
   }
   .exno {
-    position: static;
-    display: block;
-    width: auto;
-    text-align: left;
-    margin-bottom: 4px;
-  }
-  .preview {
-    margin-left: 0;
+    font-size: 24px;
   }
   .prompt {
     font-size: 19px;
+  }
+  .notebook {
+    margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px)));
+    padding-inline: max(16px, env(safe-area-inset-left, 0px));
+  }
+  .line {
+    grid-template-columns: 36px 1fr auto;
+  }
+  .line:has(.line-label) {
+    grid-template-columns: 36px auto 1fr auto;
+  }
+  .line-btn.link {
+    font-size: 14px;
+  }
+  .howto,
+  .feedback,
+  .hints,
+  .actions {
+    margin-left: 36px;
   }
 }
 

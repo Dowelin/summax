@@ -34,6 +34,7 @@ teknisk arkitektur* i claude.ai-projektet SummaX.
 ## Fas 4 – Prototyp, avvikelser från Fas 3
 
 - **Byggverktyg:** Fas 3 föreslog Vite och Vitest. Prototypen byggs med bara TypeScript och Nodes inbyggda testverktyg, eftersom paketregistret inte gick att nå från utvecklingsmiljön. Det ger färre beroenden; Vite kan läggas till senare om det behövs.
-- **Matematisk typografi:** Fas 3 föreslog KaTeX. Prototypen har en egen liten renderare för bråk, minustecken och variabler (`src/ui/math.ts`), vilket räcker för åk 6–9. KaTeX kan bytas in senare.
+- **Matematisk inmatning:** MathLive 0.101 i stället för KaTeX (beslutat 26 okt). KaTeX ritar bara matematik som ska läsas; MathLive är ett skrivfält där "/" ger ett staplat bråk. Det laddas från jsDelivr; går det inte att ladda används ett vanligt textfält med förhandsvisning. När markören står i en ifylld nämnare eller exponent hoppar den ut vid +, −, = och ·, så att man kan skriva som på papper. Uppgiftstexterna ritas fortfarande med den egna renderaren i `src/ui/math.ts`.
+- **Räknerader (beslutat 26 okt):** varje uppgift har ett räknehäfte. Ekvationer: varje rad är en ekvation som kontrolleras exakt (samma lösning som uppgiften), och svaret skrivs som x = …. Övriga områden: varje likhetstecken på en uträkningsrad kontrolleras exakt (båda sidor samma värde), och svaret skrivs på en separat svarsrad. Raderna är frivilliga. En rad som inte stämmer räknas som hjälp, inte som försök.
 - **Nivåstyrning:** tillfälligt enkel (två säkra svar i rad höjer, två olösta i rad sänker). Den riktiga modellen – 4 rätt av 5 på minst två dagar, *osäker*, *avtagande* – kräver sparad historik och kommer med Firebase.
-- Typsnitt: Source Serif 4 för uppgifter och Source Sans 3 för gränssnittet.
+- **Design (26 okt):** kapitelfärger som i en lärobok, tumregister i sidans kant och rutat papper i räknehäftet. Typsnitt: Source Serif 4 för uppgifter, Source Sans 3 för gränssnittet och Kalam för bockarna i marginalen.

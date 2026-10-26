@@ -26,6 +26,8 @@ export interface TaskRecord {
   task: Task;
   attempts: AttemptLog[];
   hintsShown: number;
+  /** Antal räknerader som inte stämde. Räknas som hjälp, inte som försök. */
+  wrongSteps?: number;
   outcome?: Outcome;
 }
 
@@ -104,6 +106,12 @@ export class Session {
     return hint;
   }
 
+  /** En räknerad som inte stämde: appen visade var det gick fel, alltså hjälp. */
+  noteWrongStep(): void {
+    const rec = this.current;
+    if (rec && !rec.outcome) rec.wrongSteps = (rec.wrongSteps ?? 0) + 1;
+  }
+
   submit(raw: string): SubmitResult {
     const rec = this.current;
     if (!rec || rec.outcome) throw new Error('Ingen aktiv uppgift');
@@ -118,7 +126,7 @@ export class Session {
     rec.attempts.push({ answer: raw, verdict: result.verdict, ...(errorClass ? { errorClass: errorClass.kind } : {}) });
 
     if (result.verdict === 'correct') {
-      const strong = rec.attempts.length === 1 && rec.hintsShown === 0;
+      const strong = rec.attempts.length === 1 && rec.hintsShown === 0 && !rec.wrongSteps;
       const outcome: Outcome = strong ? 'strong' : 'with-help';
       this.finish(rec, outcome);
       return { result, feedback: strong ? 'Rätt.' : 'Rätt – bra att du höll i.', done: true, outcome };
